@@ -1,0 +1,63 @@
+import assert from 'node:assert/strict';
+import {access} from 'node:fs/promises';
+
+const expected = [
+  'Accordion',
+  'ActionMenu',
+  'Avatar',
+  'Badge',
+  'BreadcrumbTrail',
+  'Button',
+  'Card',
+  'CardSkeleton',
+  'Checkbox',
+  'CloseIcon',
+  'ColorPicker',
+  'ComboBox',
+  'DataTable',
+  'DesktopNavigation',
+  'EmptyState',
+  'Field',
+  'FileDrop',
+  'GlassGroup',
+  'GlassSurface',
+  'Hint',
+  'InfoPopover',
+  'Kbd',
+  'LiquidGlassButton',
+  'LiquidGlassSurface',
+  'MeterBar',
+  'MobileNavigation',
+  'NativeDateInput',
+  'Notice',
+  'NotificationCenter',
+  'NotificationFlyout',
+  'NumberInput',
+  'Pagination',
+  'PasswordField',
+  'PerspectiveCard',
+  'Presentation',
+  'Progress',
+  'RadioCards',
+  'Range',
+  'SearchInput',
+  'SegmentedControl',
+  'Select',
+  'Separator',
+  'SettingsCard',
+  'Skeleton',
+  'StatusDot',
+  'Switch',
+  'Tabs',
+  'Tags',
+  'TextAreaField',
+  'Toolbar',
+];
+
+const library = await import('../dist-lib/index.js');
+assert.deepEqual(Object.keys(library).sort(), expected);
+await Promise.all([
+  access(new URL('../dist-lib/nacre.css', import.meta.url)),
+  access(new URL('../dist-lib/types/index.d.ts', import.meta.url)),
+]);
+console.log(`verified ${expected.length} exports, CSS, and declarations`);

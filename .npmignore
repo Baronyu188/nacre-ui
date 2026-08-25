@@ -1,0 +1,11 @@
+node_modules
+dist
+src
+scripts
+index.html
+tsconfig.json
+tsconfig.lib.json
+tsconfig.tsbuildinfo
+vite.config.ts
+vite.lib.config.ts
+.DS_Store

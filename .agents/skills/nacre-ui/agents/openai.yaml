@@ -1,0 +1,7 @@
+interface:
+  display_name: "Nacre UI"
+  short_description: "Build restrained liquid-glass React interfaces"
+  icon_small: "./assets/nacre-icon.png"
+  icon_large: "./assets/nacre-icon.png"
+  brand_color: "#0A84FF"
+  default_prompt: "Use $nacre-ui to build or extend this interface with Nacre components and motion."
