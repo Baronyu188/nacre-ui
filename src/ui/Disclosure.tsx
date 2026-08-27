@@ -35,7 +35,9 @@ export function Accordion({items, ...props}: AccordionProps) {
               </svg>
             </AriaButton>
           </Heading>
-          <DisclosurePanel className="nacre-disclosure__panel">{item.content}</DisclosurePanel>
+          <DisclosurePanel className="nacre-disclosure__panel">
+            <div className="nacre-disclosure__panel-inner">{item.content}</div>
+          </DisclosurePanel>
         </Disclosure>
       ))}
     </DisclosureGroup>

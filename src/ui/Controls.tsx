@@ -6,14 +6,16 @@ import {
   SliderThumb,
   SliderTrack,
   Switch as AriaSwitch,
-  ToggleButton,
-  ToggleButtonGroup,
+  ToggleButton as AriaToggleButton,
+  ToggleButtonGroup as AriaToggleButtonGroup,
   type CheckboxProps,
   type SliderProps,
   type SwitchProps,
-  type ToggleButtonGroupProps,
+  type ToggleButtonGroupProps as AriaToggleButtonGroupProps,
+  type ToggleButtonProps as AriaToggleButtonProps,
 } from 'react-aria-components';
 import {type ReactNode} from 'react';
+import {GlassAutoRim} from './Glass';
 
 export interface NacreSwitchProps extends Omit<SwitchProps, 'children' | 'className'> {
   children?: ReactNode;
@@ -73,15 +75,42 @@ export interface SegmentedOption {
   label: ReactNode;
 }
 
-export interface SegmentedControlProps extends Omit<ToggleButtonGroupProps, 'children' | 'className'> {
+export interface SegmentedControlProps extends Omit<AriaToggleButtonGroupProps, 'children' | 'className'> {
   options: SegmentedOption[];
   ariaLabel: string;
 }
 
 export function SegmentedControl({options, ariaLabel, ...props}: SegmentedControlProps) {
   return (
-    <ToggleButtonGroup {...props} aria-label={ariaLabel} className="nacre-segmented">
-      {options.map((option) => <ToggleButton key={option.id} id={option.id}>{option.label}</ToggleButton>)}
-    </ToggleButtonGroup>
+    <AriaToggleButtonGroup {...props} aria-label={ariaLabel} className="nacre-segmented">
+      <GlassAutoRim />
+      {options.map((option) => <AriaToggleButton key={option.id} id={option.id}><span className="nacre-segmented__label">{option.label}</span></AriaToggleButton>)}
+    </AriaToggleButtonGroup>
   );
+}
+
+export interface ToggleButtonProps extends Omit<AriaToggleButtonProps, 'children' | 'className'> {
+  children?: ReactNode;
+  icon?: ReactNode;
+  className?: string;
+  selectionVariant?: 'neutral' | 'accent';
+}
+
+export function ToggleButton({children, icon, className = '', selectionVariant = 'neutral', ...props}: ToggleButtonProps) {
+  return (
+    <AriaToggleButton {...props} className={`nacre-button nacre-toggle-button ${className}`.trim()} data-variant="glass" data-selection-variant={selectionVariant}>
+      <GlassAutoRim />
+      <span className="nacre-button__label">{icon}{children}</span>
+    </AriaToggleButton>
+  );
+}
+
+export interface ToggleButtonGroupProps extends Omit<AriaToggleButtonGroupProps, 'children' | 'className'> {
+  children: ReactNode;
+  className?: string;
+  selectionVariant?: 'neutral' | 'accent';
+}
+
+export function ToggleButtonGroup({children, className = '', selectionVariant = 'neutral', ...props}: ToggleButtonGroupProps) {
+  return <AriaToggleButtonGroup {...props} className={`nacre-toggle-button-group ${className}`.trim()} data-selection-variant={selectionVariant}>{children}</AriaToggleButtonGroup>;
 }

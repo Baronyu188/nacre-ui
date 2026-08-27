@@ -2,6 +2,8 @@ import {useEffect, useState} from 'react';
 import {motion} from 'motion/react';
 import {
   Accordion,
+  AlertDialog,
+  AdaptiveSheet,
   Avatar,
   Badge,
   BreadcrumbTrail,
@@ -11,6 +13,8 @@ import {
   Checkbox,
   ColorPicker,
   ComboBox,
+  CommandPalette,
+  ContextMenu,
   DataTable,
   DesktopNavigation,
   EmptyState,
@@ -22,6 +26,7 @@ import {
   InfoPopover,
   Kbd,
   MeterBar,
+  MenuButton,
   MobileNavigation,
   Notice,
   NativeDateInput,
@@ -40,11 +45,18 @@ import {
   SettingsCard,
   Switch,
   StatusDot,
+  Stepper,
   Skeleton,
   Tags,
   Tabs,
   Toolbar,
+  ToolbarButton,
+  ToggleButton,
+  ToggleButtonGroup,
+  LinkButton,
   TextAreaField,
+  Toast,
+  toastQueue,
 } from '../ui';
 
 function SparkleIcon() {
@@ -96,6 +108,39 @@ function SearchIcon() {
   return <svg aria-hidden="true" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.2" /><path d="m12.4 12.4 4.1 4.1" /></svg>;
 }
 
+function PointerIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M5 2.8 15.4 10l-5 .8-2.5 4.5L5 2.8Z" /></svg>;
+}
+
+function HandIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M6.5 9V5.5a1.2 1.2 0 0 1 2.4 0V9m0-3.8a1.2 1.2 0 0 1 2.4 0V9m0-2.8a1.2 1.2 0 0 1 2.4 0v3m0-1.5a1.2 1.2 0 0 1 2.4 0v3.1c0 4-2.2 6.2-5.8 6.2-2.1 0-3.5-.8-4.7-2.4l-2-2.7a1.2 1.2 0 0 1 1.8-1.5L6.5 11V9Z" /></svg>;
+}
+
+function PresentIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="10" rx="2" /><path d="m8 17 2-3 2 3M7 8.8l2 2 4-4" /></svg>;
+}
+
+function DownloadIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M10 3v9m0 0 3.5-3.5M10 12 6.5 8.5M4 15.5h12" /></svg>;
+}
+
+function DirectionIcon({direction}: {direction: 'right' | 'bottom' | 'left' | 'top'}) {
+  const rotation = {right: 0, bottom: 90, left: 180, top: -90}[direction];
+  return <svg aria-hidden="true" viewBox="0 0 20 20" style={{transform: `rotate(${rotation}deg)`}}><path d="M3.5 10h13M12 5.5l4.5 4.5-4.5 4.5" /></svg>;
+}
+
+function EditIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 20 20"><path d="m4 13.5-.6 3.1 3.1-.6L15.8 6.7l-2.5-2.5L4 13.5Z" /><path d="m11.8 5.7 2.5 2.5" /></svg>;
+}
+
+function CopyIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 20 20"><rect x="6" y="6" width="10" height="10" rx="2" /><path d="M13.5 6V4.5A1.5 1.5 0 0 0 12 3H4.5A1.5 1.5 0 0 0 3 4.5V12A1.5 1.5 0 0 0 4.5 13H6" /></svg>;
+}
+
+function TrashIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 5.5h12M7.5 5.5V3.8h5v1.7M5.5 5.5l.7 10.7h7.6l.7-10.7M8.2 8.5v4.8M11.8 8.5v4.8" /></svg>;
+}
+
 const densityOptions = [
   {id: 'airy', label: '宽松', description: '更舒展的空间与触摸目标'},
   {id: 'balanced', label: '均衡', description: '桌面与触摸的平衡'},
@@ -128,6 +173,12 @@ const galleryNotifications = [
   {id: 'review', title: '组件审查完成', description: '按钮与菜单共用同一圈玻璃高光。', time: '8 分钟'},
 ];
 
+const paletteCommands = [
+  {id: 'new-surface', label: '新建表面', description: '创建一个空白工作区', shortcut: '⌘ N', keywords: ['创建']},
+  {id: 'open-library', label: '打开组件库', description: '跳转到组件展廊', shortcut: '⌘ L', keywords: ['组件']},
+  {id: 'toggle-theme', label: '切换明暗模式', description: '在浅色与深色之间切换', shortcut: '⌘ ⇧ D', keywords: ['主题']},
+];
+
 export function App() {
   const [dark, setDark] = useState(false);
   const [liveGlow, setLiveGlow] = useState(true);
@@ -142,6 +193,11 @@ export function App() {
   const [notifications, setNotifications] = useState(galleryNotifications);
   const [desktopSection, setDesktopSection] = useState('connections');
   const [mobileSection, setMobileSection] = useState('home');
+  const [flowStep, setFlowStep] = useState('details');
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetPlacement, setSheetPlacement] = useState<'right' | 'left' | 'top' | 'bottom'>('right');
+  const [commandOpen, setCommandOpen] = useState(false);
+  const [refreshSpin, setRefreshSpin] = useState(0);
   const accentNumber = Number.parseInt(accent.slice(1), 16);
   const accentRgb = `${accentNumber >> 16}, ${(accentNumber >> 8) & 255}, ${accentNumber & 255}`;
   const dismissNotification = (id: string) => setNotifications((current) => current.filter((item) => item.id !== id));
@@ -280,7 +336,7 @@ export function App() {
             </article>
 
             <article className="demo-component-card demo-component-card--wide">
-              <div className="demo-card-head"><div><span>浮层</span><h3>空间展示</h3></div><code>Popover · Dialog · Drawer</code></div>
+              <div className="demo-card-head"><div><span>浮层</span><h3>空间展示</h3></div><code>Popover · Dialog · Drawer × 4</code></div>
               <div className={`demo-stage demo-stage--scene ${liveGlow ? 'is-live' : ''}`}>
                 <div className="demo-stage-orb" />
                 <GlassGroup>
@@ -296,6 +352,15 @@ export function App() {
                       <Checkbox defaultSelected>同心圆角</Checkbox>
                       <Range label="折射强度" defaultValue={54} minValue={0} maxValue={100} />
                     </div>
+                  </Presentation>
+                  <Presentation kind="drawer" placement="left" trigger="左侧抽屉" title="左侧导航面板">
+                    <p>面板从左侧平稳滑入，适合导航、目录和资源树。</p>
+                  </Presentation>
+                  <Presentation kind="drawer" placement="top" trigger="顶部抽屉" title="顶部工具面板">
+                    <p>横向面板从顶部流下，适合快捷设置和全局工具。</p>
+                  </Presentation>
+                  <Presentation kind="drawer" placement="bottom" trigger="底部抽屉" title="底部详情面板">
+                    <p>横向面板从底部升起，适合操作详情、上下文编辑和补充操作。</p>
                   </Presentation>
                 </GlassGroup>
               </div>
@@ -322,6 +387,38 @@ export function App() {
                 </div>
               </div>
               <p>反馈组件减少无意义装饰：颜色表达状态，运动只负责说明“正在变化”。</p>
+            </article>
+
+            <article className="demo-component-card demo-component-card--wide">
+              <div className="demo-card-head"><div><span>工作流</span><h3>快捷操作与确认</h3></div><code>Toast · AlertDialog · CommandPalette · MenuButton · ContextMenu</code></div>
+              <div className="demo-stage demo-workflow-grid">
+                <div className="nacre-glass-group">
+                  <Button onPress={() => toastQueue.add({title: '表面已保存', description: '修改已经写入当前工作区。', tone: 'success', actionLabel: '撤销', onAction: () => setLastAction('撤销保存')}, {timeout: 5000})}>显示 Toast</Button>
+                  <AlertDialog trigger="删除表面" title="删除这个表面？" confirmLabel="删除" tone="danger" onConfirm={() => setLastAction('删除表面')}>此操作会移除当前表面，之后无法恢复。</AlertDialog>
+                  <Button onPress={() => setCommandOpen(true)}>打开命令面板</Button>
+                  <MenuButton label="AdaptiveSheet 方向" items={[
+                    {id: 'directions', label: '选择方向', icon: <GridIcon />, children: [
+                      {id: 'right', label: '从右侧', icon: <DirectionIcon direction="right" />},
+                      {id: 'left', label: '从左侧', icon: <DirectionIcon direction="left" />},
+                      {id: 'top', label: '从顶部', icon: <DirectionIcon direction="top" />},
+                      {id: 'bottom', label: '从底部', icon: <DirectionIcon direction="bottom" />},
+                    ]},
+                  ]} onAction={(key) => {setSheetPlacement(String(key) as typeof sheetPlacement); setSheetOpen(true);}} />
+                </div>
+                <ContextMenu ariaLabel="表面快捷菜单" items={[
+                  {id: 'rename', label: '重命名', icon: <EditIcon />, shortcut: '↵'},
+                  {id: 'duplicate', label: '制作副本', icon: <CopyIcon />, shortcut: '⌘ D'},
+                  {id: 'move', label: '移动到', icon: <GridIcon />, children: [
+                    {id: 'move-workspace', label: '工作区', icon: <HomeIcon />},
+                    {id: 'move-library', label: '资源库', icon: <LibraryIcon />},
+                    {id: 'move-archive', label: '归档', icon: <StorageIcon />},
+                  ]},
+                  {id: 'delete', label: '删除', icon: <TrashIcon />, tone: 'danger'},
+                ]} onAction={(key) => setLastAction(`右键菜单：${String(key)}`)}>
+                  <div className="demo-context-target"><strong>表面快捷区</strong><span>右键，或按 Shift + F10</span></div>
+                </ContextMenu>
+              </div>
+              <p>轻量反馈、危险确认、命令搜索和可组合菜单各自承担单一任务。</p>
             </article>
 
             <article className="demo-component-card demo-component-card--wide">
@@ -376,17 +473,38 @@ export function App() {
             </article>
 
             <article className="demo-component-card demo-component-card--wide">
-              <div className="demo-card-head"><div><span>应用界面</span><h3>工具与元数据</h3></div><code>Toolbar · Tags</code></div>
+              <div className="demo-card-head"><div><span>应用界面</span><h3>工具与元数据</h3></div><code>Toolbar · ToggleButton · IconButton · LinkButton</code></div>
               <div className="demo-stage demo-application-grid">
                 <Toolbar aria-label="画布工具">
-                  <Button variant="quiet" magnetic={false} onPress={() => setLastAction('选择')}>选择</Button>
-                  <Button variant="quiet" magnetic={false} onPress={() => setLastAction('移动')}>移动</Button>
-                  <Button variant="prominent" magnetic={false} onPress={() => setLastAction('呈现')}>呈现</Button>
+                  <ToolbarButton label="选择" icon={<PointerIcon />} onPress={() => setLastAction('选择')} />
+                  <ToolbarButton label="移动" icon={<HandIcon />} onPress={() => setLastAction('移动')} />
+                  <ToolbarButton label="呈现" icon={<PresentIcon />} onPress={() => setLastAction('呈现')} />
                 </Toolbar>
                 <Tags label="表面特性" items={tags} onRemove={(keys) => setTags((items) => items.filter((item) => !keys.has(item.id)))} />
+                <div className="demo-primitive-row">
+                  <ToggleButtonGroup aria-label="抽屉面板" selectionMode="single" selectionVariant="accent" defaultSelectedKeys={['questions']}>
+                    <ToggleButton id="questions" icon={<LibraryIcon />}>题目列表</ToggleButton>
+                    <ToggleButton id="layout" icon={<GridIcon />}>版式信息</ToggleButton>
+                  </ToggleButtonGroup>
+                  <ToolbarButton className="demo-refresh-button" label="刷新" icon={<span key={refreshSpin} className={refreshSpin ? 'demo-refresh-icon' : ''}><UpdateIcon /></span>} onPress={() => {setRefreshSpin((value) => value + 1); setLastAction('刷新');}} />
+                  <LinkButton href="/nacre-icon.png" download="nacre-icon.png"><DownloadIcon />下载图标</LinkButton>
+                </div>
                 <small className="demo-action-result">工具 · {lastAction}</small>
               </div>
-              <p>工具栏作为轻量功能层悬浮；标签属于内容元数据，保持安静，只有移除动作会发亮。</p>
+              <p>独立切换按钮允许全部取消或互斥选择；图标按钮、链接按钮与工具栏共用材质。</p>
+            </article>
+
+            <article className="demo-component-card demo-component-card--wide">
+              <div className="demo-card-head"><div><span>流程</span><h3>分步骤推进</h3></div><code>Stepper</code></div>
+              <div className="demo-stage demo-stepper-stage">
+                <Stepper selectedKey={flowStep} onSelectionChange={setFlowStep} items={[
+                  {id: 'details', label: '基本信息', description: '定义项目', content: <><strong>填写项目的基本信息</strong><p>步骤内容完全由使用方传入，可以放置表单、说明或自定义组件。</p></>},
+                  {id: 'appearance', label: '外观', description: '调整材质', content: <><strong>选择界面外观</strong><p>可以返回已经完成的步骤，也可以点击任意步骤直接切换。</p></>},
+                  {id: 'review', label: '检查', description: '确认设置', content: <><strong>检查全部设置</strong><p>最后确认之前仍可回到前面的任意流程。</p></>},
+                  {id: 'complete', label: '完成', description: '开始使用', content: <><strong>设置已经就绪</strong><p>这里可以替换成提交结果、下一项任务或完成状态。</p></>},
+                ]} />
+              </div>
+              <p>步骤本身可以任意跳转；底部保留后退、继续和直达末步三个明确动作。</p>
             </article>
 
             <article className="demo-component-card">
@@ -444,6 +562,19 @@ export function App() {
             </article>
           </div>
         </section>
+        <AdaptiveSheet
+          isOpen={sheetOpen}
+          onOpenChange={setSheetOpen}
+          title="响应式面板"
+          placement={sheetPlacement}
+          mobilePlacement={sheetPlacement}
+          footer={<><Button onPress={() => setSheetOpen(false)}>取消</Button><Button variant="prominent" onPress={() => setSheetOpen(false)}>保存</Button></>}
+        >
+          <strong>受控 AdaptiveSheet</strong>
+          <p>当前从{sheetPlacement === 'right' ? '右侧' : sheetPlacement === 'left' ? '左侧' : sheetPlacement === 'top' ? '顶部' : '底部'}出现。正文独立滚动，页脚固定并保留安全区。</p>
+        </AdaptiveSheet>
+        <CommandPalette isOpen={commandOpen} onOpenChange={setCommandOpen} commands={paletteCommands} onAction={(key) => {if (key === 'toggle-theme') setDark((value) => !value); setLastAction(`命令：${String(key)}`);}} />
+        <Toast />
       </main>
     </div>
   );

@@ -56,8 +56,8 @@ document.documentElement.style.setProperty('--nacre-accent-rgb', '10, 132, 255')
 
 - Material and actions: `GlassSurface`, `GlassGroup`, `LiquidGlassSurface`, `PerspectiveCard`, `Button`, `LiquidGlassButton`
 - Forms and selection: `Field`, `TextAreaField`, `SearchInput`, `PasswordField`, `NativeDateInput`, `Select`, `ComboBox`, `Switch`, `Checkbox`, `RadioCards`, `Range`, `NumberInput`, `Tags`, `Tabs`, `SegmentedControl`
-- Navigation and application chrome: `DesktopNavigation`, `MobileNavigation`, `BreadcrumbTrail`, `ActionMenu`, `Toolbar`, `Pagination`, `FileDrop`, `ColorPicker`
-- Structure and overlays: `Accordion`, `InfoPopover`, `Hint`, `Presentation`, `NotificationCenter`
+- Navigation and application chrome: `DesktopNavigation`, `MobileNavigation`, `BreadcrumbTrail`, `ActionMenu`, `MenuButton`, `ContextMenu`, `CommandPalette`, `Toolbar`, `Pagination`, `FileDrop`, `ColorPicker`
+- Structure and overlays: `Accordion`, `InfoPopover`, `Hint`, `Presentation`, `AdaptiveSheet`, `AlertDialog`, `Toast`, `NotificationCenter`
 - Content and feedback: `Card`, `CardSkeleton`, `SettingsCard`, `DataTable`, `Progress`, `MeterBar`, `Badge`, `Notice`, `Skeleton`, `EmptyState`, `Avatar`, `StatusDot`, `Kbd`, `Separator`
 
 ## Gallery and package
