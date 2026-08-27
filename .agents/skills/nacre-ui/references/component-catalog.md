@@ -22,14 +22,18 @@ Import all public components from `@nacre-ui/react`.
 
 - `DesktopNavigation`: floating 5%-fill blurred sidebar with neutral glass selection.
 - `MobileNavigation`: translucent bottom navigation with shared spring lens and optional separate action.
-- `BreadcrumbTrail`, `ActionMenu`, `Toolbar`, `Pagination`, `FileDrop`, `ColorPicker`.
+- `BreadcrumbTrail`, `ActionMenu`, `MenuButton`, `ContextMenu`, `Toolbar`, `Pagination`, `FileDrop`, `ColorPicker`.
 
 ## Structure, overlays, and feedback
 
 - `Accordion`: animated disclosure with continuous height and color transitions.
 - `InfoPopover`, `Hint`: lightweight anchored information.
-- `Presentation`: opaque `dialog` or `drawer`; children provide their own actions.
+- `Presentation`: opaque `dialog` or four-direction `drawer`; children provide their own actions.
+- `AdaptiveSheet`: controlled four-direction sheet with scrolling body, fixed footer, and independent mobile placement.
+- `AlertDialog`: dedicated confirmation for destructive or irreversible actions.
+- `CommandPalette`: controlled searchable command surface with keyboard-ready list actions.
 - `NotificationCenter` / `NotificationFlyout`: notification drawer with dismissible glass notification rows.
+- `Toast`: transient success, failure, warning, and undo feedback through the exported `toastQueue`.
 - `Progress`, `MeterBar`, `Badge`, `Notice`, `Skeleton`.
 
 ## Content and data

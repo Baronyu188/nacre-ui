@@ -1,11 +1,18 @@
 import {type CSSProperties, type PointerEvent, type ReactNode} from 'react';
-import {Button as AriaButton, type ButtonProps as AriaButtonProps} from 'react-aria-components';
+import {
+  Button as AriaButton,
+  Link as AriaLink,
+  type ButtonProps as AriaButtonProps,
+  type LinkProps as AriaLinkProps,
+} from 'react-aria-components';
+import {GlassAutoRim} from './Glass';
 
 export interface ButtonProps extends Omit<AriaButtonProps, 'className' | 'style' | 'children'> {
   children: ReactNode;
   className?: string;
   variant?: 'glass' | 'prominent' | 'quiet';
   magnetic?: boolean;
+  autoRim?: boolean;
   style?: CSSProperties;
 }
 
@@ -13,11 +20,16 @@ export function CloseIcon() {
   return <svg className="nacre-close-icon" aria-hidden="true" viewBox="0 0 16 16"><path d="m4 4 8 8m0-8-8 8" /></svg>;
 }
 
+function LoadingIcon() {
+  return <svg className="nacre-loading-icon" aria-hidden="true" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" /></svg>;
+}
+
 export function Button({
   children,
   className = '',
   variant = 'glass',
   magnetic = false,
+  autoRim = true,
   style,
   onPointerDown,
   onPointerMove,
@@ -70,7 +82,47 @@ export function Button({
       onPointerCancel={onPointerCancel}
       onPointerLeave={handleLeave}
     >
+      {autoRim && variant !== 'quiet' && <GlassAutoRim />}
       <span className="nacre-button__label">{children}</span>
     </AriaButton>
+  );
+}
+
+export interface IconButtonProps extends Omit<ButtonProps, 'children' | 'aria-label'> {
+  icon: ReactNode;
+  label: string;
+  size?: 'small' | 'medium' | 'large';
+  shape?: 'circle' | 'squircle';
+  isLoading?: boolean;
+}
+
+export function IconButton({icon, label, size = 'medium', shape = 'circle', isLoading = false, isDisabled, className = '', ...props}: IconButtonProps) {
+  return (
+    <Button
+      {...props}
+      className={`nacre-icon-button ${className}`.trim()}
+      data-size={size}
+      data-shape={shape}
+      aria-label={label}
+      aria-busy={isLoading || undefined}
+      isDisabled={isDisabled || isLoading}
+    >
+      {isLoading ? <LoadingIcon /> : icon}
+    </Button>
+  );
+}
+
+export interface LinkButtonProps extends Omit<AriaLinkProps, 'children' | 'className'> {
+  children: ReactNode;
+  className?: string;
+  variant?: ButtonProps['variant'];
+}
+
+export function LinkButton({children, className = '', variant = 'glass', ...props}: LinkButtonProps) {
+  return (
+    <AriaLink {...props} data-variant={variant} className={`nacre-button nacre-link-button ${className}`.trim()}>
+      {variant !== 'quiet' && <GlassAutoRim />}
+      <span className="nacre-button__label">{children}</span>
+    </AriaLink>
   );
 }

@@ -11,6 +11,7 @@ import {
 import {motion} from 'motion/react';
 import {useId} from 'react';
 import {LiquidGlassFilter, useLiquidGlassFilter, useLiquidPopoverMorph} from './LiquidGlass';
+import {GlassAutoRim} from './Glass';
 
 export interface ComboOption {
   id: string;
@@ -24,9 +25,10 @@ export interface ComboBoxProps extends Omit<AriaComboBoxProps<ComboOption>, 'chi
   options: ComboOption[];
   description?: string;
   placeholder?: string;
+  matchTriggerWidth?: boolean;
 }
 
-export function ComboBox({label, options, description, placeholder, ...props}: ComboBoxProps) {
+export function ComboBox({label, options, description, placeholder, matchTriggerWidth = true, ...props}: ComboBoxProps) {
   const liquid = useLiquidGlassFilter();
   const morph = useLiquidPopoverMorph();
   const trackId = useId();
@@ -41,7 +43,8 @@ export function ComboBox({label, options, description, placeholder, ...props}: C
         <Input placeholder={placeholder} />
       </div>
       {description && <Text slot="description">{description}</Text>}
-      <Popover ref={morph.ref} className="nacre-popover nacre-combobox__popover" data-liquid offset={8} style={liquid.style} onPointerMove={morph.onPointerMove} onPointerLeave={morph.onPointerLeave}>
+      <Popover ref={morph.ref} className="nacre-popover nacre-combobox__popover" data-liquid data-match-trigger-width={matchTriggerWidth || undefined} placement="bottom start" offset={8} containerPadding={12} shouldFlip style={liquid.style} onPointerMove={morph.onPointerMove} onPointerLeave={morph.onPointerLeave}>
+        <GlassAutoRim />
         <LiquidGlassFilter id={liquid.id} />
         <span className="nacre-liquid-glass__refraction" aria-hidden="true" />
         <ListBox<ComboOption> className="nacre-listbox">

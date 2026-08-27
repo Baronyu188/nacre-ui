@@ -14,7 +14,16 @@ import {
   type RadioGroupProps,
   type TagGroupProps,
 } from 'react-aria-components';
-import {CloseIcon} from './Button';
+import {Button, CloseIcon} from './Button';
+import {GlassAutoRim} from './Glass';
+
+function MinusIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4 10h12" /></svg>;
+}
+
+function PlusIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M10 4v12M4 10h12" /></svg>;
+}
 
 export interface RadioCardOption {
   value: string;
@@ -34,6 +43,7 @@ export function RadioCards({label, options, ...props}: RadioCardsProps) {
       <div className="nacre-radio-cards">
         {options.map((option) => (
           <Radio key={option.value} value={option.value} className="nacre-radio-card">
+            <GlassAutoRim />
             <span className="nacre-radio-card__control"><span /></span>
             <span><strong>{option.label}</strong>{option.description && <small>{option.description}</small>}</span>
           </Radio>
@@ -53,9 +63,10 @@ export function NumberInput({label, description, ...props}: NumberInputProps) {
     <AriaNumberField {...props} className="nacre-number-field">
       <Label>{label}</Label>
       <Group className="nacre-number-field__group">
-        <AriaButton slot="decrement" aria-label={`减少${label}`}>−</AriaButton>
+        <GlassAutoRim />
+        <Button slot="decrement" magnetic={false} aria-label={`减少${label}`}><MinusIcon /></Button>
         <Input />
-        <AriaButton slot="increment" aria-label={`增加${label}`}>+</AriaButton>
+        <Button slot="increment" magnetic={false} aria-label={`增加${label}`}><PlusIcon /></Button>
       </Group>
       {description && <Text slot="description">{description}</Text>}
     </AriaNumberField>

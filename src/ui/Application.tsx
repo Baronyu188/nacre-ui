@@ -8,7 +8,9 @@ import {
   type FileTriggerProps,
   type ToolbarProps,
 } from 'react-aria-components';
-import {Button} from './Button';
+import {Button, IconButton} from './Button';
+import {GlassAutoRim} from './Glass';
+import type {IconButtonProps} from './Button';
 
 export interface ToolbarContainerProps extends Omit<ToolbarProps, 'children' | 'className'> {
   children: ReactNode;
@@ -16,6 +18,12 @@ export interface ToolbarContainerProps extends Omit<ToolbarProps, 'children' | '
 
 export function Toolbar({children, ...props}: ToolbarContainerProps) {
   return <AriaToolbar {...props} className="nacre-toolbar">{children}</AriaToolbar>;
+}
+
+export type ToolbarButtonProps = Omit<IconButtonProps, 'size' | 'shape' | 'variant' | 'magnetic'>;
+
+export function ToolbarButton({icon, label, className = '', ...props}: ToolbarButtonProps) {
+  return <IconButton {...props} className={`nacre-toolbar-button ${className}`.trim()} icon={icon} label={label} size="medium" shape="circle" variant="glass" magnetic={false} />;
 }
 
 export interface PaginationProps {
@@ -29,6 +37,7 @@ export function Pagination({page, totalPages, onChange, label = '分页'}: Pagin
   const safePage = Math.min(Math.max(page, 1), Math.max(totalPages, 1));
   return (
     <nav className="nacre-pagination" aria-label={label}>
+      <GlassAutoRim />
       <Button className="nacre-pagination__previous" magnetic={false} aria-label="上一页" isDisabled={safePage <= 1} onPress={() => onChange(safePage - 1)}>
         <svg aria-hidden="true" viewBox="0 0 20 20"><path d="m12.5 4.5-5.5 5.5 5.5 5.5" /></svg>
       </Button>

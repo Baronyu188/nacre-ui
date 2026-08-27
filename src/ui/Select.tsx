@@ -12,6 +12,7 @@ import {
 import {motion} from 'motion/react';
 import {useId} from 'react';
 import {LiquidGlassFilter, useLiquidGlassFilter, useLiquidPopoverMorph} from './LiquidGlass';
+import {GlassAutoRim} from './Glass';
 
 export interface SelectOption {
   id: string;
@@ -23,9 +24,10 @@ export interface SelectProps extends Omit<AriaSelectProps<object>, 'children' | 
   label: string;
   options: SelectOption[];
   description?: string;
+  matchTriggerWidth?: boolean;
 }
 
-export function Select({label, options, description, ...props}: SelectProps) {
+export function Select({label, options, description, matchTriggerWidth = true, ...props}: SelectProps) {
   const liquid = useLiquidGlassFilter();
   const morph = useLiquidPopoverMorph();
   const trackId = useId();
@@ -33,13 +35,15 @@ export function Select({label, options, description, ...props}: SelectProps) {
     <AriaSelect {...props} className="nacre-select">
       <Label>{label}</Label>
       <AriaButton className="nacre-select__trigger">
+        <GlassAutoRim />
         <SelectValue>{({selectedText, defaultChildren}) => selectedText ?? defaultChildren}</SelectValue>
         <svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16">
           <path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </AriaButton>
       {description && <Text slot="description">{description}</Text>}
-      <Popover ref={morph.ref} className="nacre-popover nacre-select__popover" data-liquid offset={8} style={liquid.style} onPointerMove={morph.onPointerMove} onPointerLeave={morph.onPointerLeave}>
+      <Popover ref={morph.ref} className="nacre-popover nacre-select__popover" data-liquid data-match-trigger-width={matchTriggerWidth || undefined} placement="bottom start" offset={8} containerPadding={12} shouldFlip style={liquid.style} onPointerMove={morph.onPointerMove} onPointerLeave={morph.onPointerLeave}>
+        <GlassAutoRim />
         <LiquidGlassFilter id={liquid.id} />
         <span className="nacre-liquid-glass__refraction" aria-hidden="true" />
         <ListBox className="nacre-listbox" items={options}>

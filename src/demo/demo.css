@@ -105,7 +105,7 @@ a {color: inherit; text-decoration: none;}
 .demo-tabs-stage .nacre-tab {color: rgba(255,255,255,.72);}
 .demo-tabs-stage .nacre-tab[data-selected], .demo-tabs-stage .demo-tab-copy {color: white;}
 .demo-tabs-stage .demo-tab-copy span {color: rgba(255,255,255,.7);}
-.demo-tabs-stage .nacre-tablist {background: rgba(255,255,255,.12);}
+.demo-tabs-stage .nacre-tablist-shell {--nacre-plain-selection-fill: rgba(255,255,255,.26);}
 .demo-component-card > p {margin: 0; color: var(--nacre-muted); font-size: 13px; line-height: 1.6;}
 .demo-tab-copy {display: flex; align-items: baseline; gap: 8px; padding: 10px 4px;}
 .demo-tab-copy b {font-size: 35px; letter-spacing: -.06em;}
@@ -124,12 +124,17 @@ a {color: inherit; text-decoration: none;}
 .demo-stage--scene {position: relative; min-height: 310px; overflow: hidden; place-items: center; background: linear-gradient(rgba(14,24,35,.22), rgba(14,24,35,.4)), url('./assets/button-landscape.jpg') center 56% / cover;}
 .demo-stage--scene::before {position: absolute; inset: 0; background: linear-gradient(110deg, rgba(14,24,35,.12), transparent 48%, rgba(10,83,155,.12)); content: ''; transition: opacity 400ms ease;}
 .demo-stage--scene:not(.is-live)::before {opacity: .28;}
-.demo-stage--scene .nacre-glass-group {position: relative; z-index: 1; flex-wrap: wrap; justify-content: center;}
-.demo-stage--scene .nacre-button[data-variant='glass'] {color: white;}
+.demo-stage--scene .nacre-glass-group {position: relative; z-index: 1; flex-wrap: wrap; justify-content: center; border: 0; border-radius: 24px; background: rgba(198,205,214,.42); padding: 7px; -webkit-backdrop-filter: blur(16px) saturate(125%); backdrop-filter: blur(16px) saturate(125%);}
+.demo-stage--scene .nacre-button[data-variant='glass'] {color: #171821;}
 .demo-stage-orb {position: absolute; width: 90px; height: 90px; border-radius: 50%; background: rgba(255,255,255,.07); box-shadow: 0 0 0 30px rgba(255,255,255,.025);}
 .demo-drawer-options {display: grid; gap: 25px; margin-top: 28px;}
 .demo-feedback-grid {grid-template-columns: minmax(0, 1.25fr) minmax(230px, .75fr); gap: 26px;}
 .demo-feedback-stack {display: grid; align-content: center; gap: 19px;}
+.demo-workflow-grid {grid-template-columns: minmax(0,1.2fr) minmax(230px,.8fr); align-items: center; gap: 24px;}
+.demo-workflow-grid > .nacre-glass-group {flex-wrap: wrap;}
+.demo-context-target {display: grid; min-height: 104px; align-content: center; gap: 5px; border-radius: 18px; background: rgba(116,118,133,.08); padding: 18px;}
+.demo-context-target strong {font-size: 14px;}
+.demo-context-target span {color: var(--nacre-muted); font-size: 11px;}
 .demo-badge-row {display: flex; flex-wrap: wrap; gap: 7px;}
 .demo-skeleton-card {display: grid; min-height: 150px; grid-template-columns: auto 1fr; align-content: center; gap: 13px; border: 1px solid var(--nacre-hairline); border-radius: 20px; background: var(--nacre-surface-solid); padding: 18px;}
 .demo-skeleton-card > div {display: grid; align-content: center; gap: 9px;}
@@ -138,6 +143,11 @@ a {color: inherit; text-decoration: none;}
 .demo-advanced-form-grid {grid-template-columns: minmax(0, 1fr) 220px; align-items: end; gap: 26px;}
 .demo-application-grid {grid-template-columns: auto minmax(0, 1fr); align-items: end; gap: 24px;}
 .demo-application-grid > small {grid-column: 1 / -1;}
+.demo-primitive-row {display: flex; grid-column: 1 / -1; flex-wrap: wrap; align-items: center; gap: 9px;}
+.demo-refresh-button span > span {display: grid; place-items: center;}
+.demo-refresh-icon {animation: demo-refresh-spin 560ms cubic-bezier(.2,.72,.2,1);}
+@keyframes demo-refresh-spin {to {transform: rotate(1turn);}}
+.demo-stepper-stage {min-height: 300px;}
 .demo-centered-stage {place-items: center;}
 .demo-file-stage {gap: 10px; padding: 18px;}
 .demo-input-suite {grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 22px;}
@@ -176,7 +186,7 @@ a {color: inherit; text-decoration: none;}
   .demo-principles {padding: 90px 20px;}
   .demo-stage {padding: 20px;}
   .demo-stage--color .nacre-glass-group {justify-content: center; flex-wrap: wrap;}
-  .demo-feedback-grid, .demo-settings-grid {grid-template-columns: 1fr;}
+  .demo-feedback-grid, .demo-settings-grid, .demo-workflow-grid {grid-template-columns: 1fr;}
   .demo-card-presets {grid-template-columns: 1fr 1fr;}
   .demo-advanced-form-grid, .demo-application-grid {grid-template-columns: 1fr; align-items: stretch;}
   .demo-input-suite {grid-template-columns: 1fr;}

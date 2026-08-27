@@ -16,5 +16,6 @@ export type {LiquidGlassButtonProps, LiquidGlassSurfaceProps} from './LiquidGlas
 export * from './Navigation';
 export * from './Overlays';
 export * from './Select';
+export * from './Stepper';
 export * from './Tabs';
 import './theme.css';

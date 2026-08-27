@@ -16,6 +16,7 @@ Use the exported components before writing new primitives. Import components fro
 ## Invariants
 
 - Keep stable content surfaces opaque and readable. Reserve glass for controls, navigation, selection lenses, menus, and temporary overlays.
+- When controls sit over photography or another complex scene, place the group on one borderless, moderately opaque blurred support surface. It must improve label stability without adding a rim or edge highlight.
 - Render exactly one one-pixel rim per glass boundary. Never stack a CSS border with a masked highlight on the same edge.
 - Use `--nacre-accent` and `--nacre-accent-rgb`; do not hard-code blue into reusable component states.
 - Keep selection neutral unless it represents a primary action. Theme color is a variable, not wallpaper.
