@@ -194,8 +194,9 @@ a {color: inherit; text-decoration: none;}
   .demo-gallery-mobile-navigation {position: fixed; z-index: 60; display: block; width: min(560px, calc(100% - 24px)); right: 50%; bottom: max(12px, env(safe-area-inset-bottom)); transform: translateX(50%);}
   .demo-chat-stage {height: auto; min-height: 620px; max-height: none; grid-template-columns: 1fr;}
   .demo-chat-list-panel {width: auto; max-width: none; min-height: 620px; overflow: visible; border-right: 0; border-bottom: 0; background: var(--nacre-surface-solid); padding: 10px; resize: none;}
-  .demo-chat-list-panel .nacre-desktop-navigation {border-radius: 0; background: transparent; box-shadow: none; padding: 8px 4px; -webkit-backdrop-filter: none; backdrop-filter: none;}
+  .demo-chat-list-panel .nacre-desktop-navigation {width: 100% !important; border-radius: 0; background: transparent; box-shadow: none; padding: 8px 4px; -webkit-backdrop-filter: none; backdrop-filter: none;}
   .demo-chat-list-panel .nacre-desktop-navigation::before, .demo-chat-list-panel .nacre-desktop-navigation > .nacre-glass-auto-rim {display: none;}
+  .demo-chat-list-panel .nacre-desktop-navigation__resizer {display: none;}
   .demo-chat-stage[data-mobile-view='list'] .demo-chat-thread {display: none;}
   .demo-chat-stage[data-mobile-view='thread'] .demo-chat-list-panel {display: none;}
   .demo-chat-back {display: grid;}
