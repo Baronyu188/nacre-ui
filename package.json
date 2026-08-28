@@ -1,6 +1,6 @@
 {
   "name": "@nacre-ui/react",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Reusable React components for restrained liquid-glass interfaces.",
   "private": true,
   "license": "MIT",

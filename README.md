@@ -8,7 +8,7 @@
 
 > Private preview. The API is reusable today, but the package is intentionally protected from public npm publication while it is still being reviewed.
 
-Current preview: **v0.2.0**. See [CHANGELOG.md](./CHANGELOG.md) for release details.
+Current preview: **v0.3.0**. See [CHANGELOG.md](./CHANGELOG.md) for release details.
 
 ## Design direction
 
