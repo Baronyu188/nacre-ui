@@ -36,7 +36,7 @@ export function Select({label, options, description, matchTriggerWidth = true, .
       <Label>{label}</Label>
       <AriaButton className="nacre-select__trigger">
         <GlassAutoRim />
-        <SelectValue>{({selectedText, defaultChildren}) => selectedText ?? defaultChildren}</SelectValue>
+        <SelectValue className="nacre-select__value">{({selectedText, defaultChildren}) => selectedText ?? defaultChildren}</SelectValue>
         <svg aria-hidden="true" viewBox="0 0 16 16" width="16" height="16">
           <path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>

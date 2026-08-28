@@ -535,7 +535,15 @@
 }
 
 .nacre-select__trigger > svg:not(.nacre-glass-path-rim) {
+  flex: none;
   transition: transform var(--nacre-spring);
+}
+
+.nacre-select__value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nacre-popover {
@@ -631,6 +639,8 @@
 
 .nacre-listbox {
   display: grid;
+  min-width: 0;
+  max-width: 100%;
   gap: 2px;
   outline: none;
 }
@@ -638,6 +648,8 @@
 .nacre-listbox__item {
   position: relative;
   display: flex;
+  min-width: 0;
+  max-width: 100%;
   min-height: 44px;
   align-items: center;
   justify-content: space-between;
@@ -656,9 +668,12 @@
 }
 
 .nacre-listbox__item > span:not(.nacre-listbox__track) {
+  flex: 1 1 auto;
   min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nacre-listbox__item small {
@@ -682,6 +697,7 @@
 }
 
 .nacre-checkmark {
+  flex: none;
   opacity: 0;
   color: var(--nacre-muted);
   transform: scale(0.65);
@@ -1233,6 +1249,8 @@
 
 .nacre-menu {
   display: grid;
+  min-width: 0;
+  max-width: 100%;
   gap: 2px;
   outline: none;
 }
@@ -1240,6 +1258,8 @@
 .nacre-menu__item {
   position: relative;
   display: grid;
+  min-width: 0;
+  max-width: 100%;
   min-height: 40px;
   grid-template-columns: 26px minmax(0, 1fr) auto;
   align-items: center;
