@@ -1,4 +1,4 @@
-import {useEffect, useId, useRef, useState, type KeyboardEvent, type MouseEvent, type ReactNode} from 'react';
+import {useEffect, useId, useRef, useState, type Dispatch, type KeyboardEvent, type MouseEvent, type PointerEvent as ReactPointerEvent, type ReactNode, type SetStateAction} from 'react';
 import {motion} from 'motion/react';
 import {
   Breadcrumb,
@@ -10,9 +10,10 @@ import {
   MenuTrigger,
   Popover,
   SubmenuTrigger,
+  Toolbar as AriaToolbar,
   type Key,
 } from 'react-aria-components';
-import {Button} from './Button';
+import {Button, type ButtonProps} from './Button';
 import {GlassAutoRim} from './Glass';
 import {LiquidGlassFilter, useLiquidGlassFilter, useLiquidPopoverMorph} from './LiquidGlass';
 
@@ -50,22 +51,70 @@ interface NavigationProps {
   ariaLabel: string;
 }
 
-interface DesktopNavigationProps extends NavigationProps {
+export interface DesktopNavigationProps extends NavigationProps {
   title?: ReactNode;
+  headerAction?: ReactNode;
+  contextMenuItems?: ActionItem[] | ((item: NavigationItem) => ActionItem[]);
+  onContextAction?: (itemId: string, key: Key) => void;
+  hideLabel?: string;
+  onHide?: () => void;
+  isResizable?: boolean;
+  width?: number;
+  defaultWidth?: number;
+  minWidth?: number;
+  maxWidth?: number;
+  onWidthChange?: (width: number) => void;
 }
 
-export function DesktopNavigation({items, selectedKey, onSelectionChange, ariaLabel, title = '导航'}: DesktopNavigationProps) {
+export function DesktopNavigation({items, selectedKey, onSelectionChange, ariaLabel, title = '导航', headerAction, contextMenuItems, onContextAction, hideLabel = '隐藏导航栏', onHide, isResizable = true, width, defaultWidth, minWidth = 180, maxWidth = 380, onWidthChange}: DesktopNavigationProps) {
   const layoutId = useId();
+  const navRef = useRef<HTMLElement>(null);
+  const dragRef = useRef<{x: number; width: number} | null>(null);
+  const [internalWidth, setInternalWidth] = useState(defaultWidth);
+  const currentWidth = width ?? internalWidth;
+  const updateWidth = (nextWidth: number) => {
+    const next = Math.min(maxWidth, Math.max(minWidth, nextWidth));
+    if (width === undefined) setInternalWidth(next);
+    onWidthChange?.(next);
+  };
+  const startResize = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    dragRef.current = {x: event.clientX, width: navRef.current?.getBoundingClientRect().width ?? currentWidth ?? minWidth};
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+  const resize = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (dragRef.current) updateWidth(dragRef.current.width + event.clientX - dragRef.current.x);
+  };
+  const finishResize = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    dragRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+  };
+  const resizeWithKeyboard = (event: KeyboardEvent<HTMLButtonElement>) => {
+    const current = navRef.current?.getBoundingClientRect().width ?? currentWidth ?? minWidth;
+    if (event.key === 'ArrowLeft') updateWidth(current - 8);
+    else if (event.key === 'ArrowRight') updateWidth(current + 8);
+    else if (event.key === 'Home') updateWidth(minWidth);
+    else if (event.key === 'End') updateWidth(maxWidth);
+    else return;
+    event.preventDefault();
+  };
   return (
-    <nav className="nacre-desktop-navigation" aria-label={ariaLabel}>
+    <nav ref={navRef} className="nacre-desktop-navigation" aria-label={ariaLabel} data-resizable={isResizable || undefined} style={currentWidth ? {width: currentWidth} : undefined}>
       <GlassAutoRim />
       <header className="nacre-desktop-navigation__head">
         <strong>{title}</strong>
+        {(headerAction || onHide) && <span className="nacre-desktop-navigation__actions">
+          {headerAction}
+          {onHide && (
+            <button type="button" className="nacre-desktop-navigation__hide" aria-label={hideLabel} title={hideLabel} onClick={onHide}>
+              <svg aria-hidden="true" viewBox="0 0 20 20"><path d="m12.5 4.5-5.5 5.5 5.5 5.5" /></svg>
+            </button>
+          )}
+        </span>}
       </header>
       <div className="nacre-desktop-navigation__items">
         {items.map((item) => {
           const isSelected = selectedKey === item.id;
-          return (
+          const button = (
             <button key={item.id} type="button" className="nacre-desktop-navigation__item" data-selected={isSelected || undefined} aria-current={isSelected ? 'page' : undefined} onClick={() => onSelectionChange?.(item.id)}>
               {isSelected && (
                 <motion.span layoutId={layoutId} className="nacre-desktop-navigation__lens" transition={{type: 'spring', stiffness: 310, damping: 21, mass: .72}}>
@@ -76,8 +125,11 @@ export function DesktopNavigation({items, selectedKey, onSelectionChange, ariaLa
               <span className="nacre-desktop-navigation__label">{item.label}</span>
             </button>
           );
+          const menuItems = typeof contextMenuItems === 'function' ? contextMenuItems(item) : contextMenuItems;
+          return menuItems?.length ? <ContextMenu key={item.id} ariaLabel={`${typeof item.label === 'string' ? item.label : item.id} 操作`} items={menuItems} isFocusable={false} onAction={(key) => onContextAction?.(item.id, key)}>{button}</ContextMenu> : button;
         })}
       </div>
+      {isResizable && <button type="button" className="nacre-desktop-navigation__resizer" aria-label="调整导航栏宽度" onPointerDown={startResize} onPointerMove={resize} onPointerUp={finishResize} onPointerCancel={finishResize} onKeyDown={resizeWithKeyboard} />}
     </nav>
   );
 }
@@ -157,24 +209,28 @@ export interface ActionMenuProps {
   label: ReactNode;
   items: ActionItem[];
   onAction?: (key: Key) => void;
+  ariaLabel?: string;
+  buttonClassName?: string;
+  buttonVariant?: ButtonProps['variant'];
+  showChevron?: boolean;
 }
 
-export function ActionMenu({label, items, onAction}: ActionMenuProps) {
+export function ActionMenu({label, items, onAction, ariaLabel, buttonClassName, buttonVariant = 'glass', showChevron = true}: ActionMenuProps) {
   const liquid = useLiquidGlassFilter();
   const morph = useLiquidPopoverMorph();
   return (
     <MenuTrigger>
-      <Button variant="glass">
+      <Button variant={buttonVariant} className={buttonClassName} aria-label={ariaLabel}>
         {label}
-        <svg aria-hidden="true" viewBox="0 0 16 16" width="15" height="15">
+        {showChevron && <svg aria-hidden="true" viewBox="0 0 16 16" width="15" height="15">
           <path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        </svg>}
       </Button>
       <Popover ref={morph.ref} className="nacre-popover nacre-menu-popover" placement="bottom end" data-liquid offset={8} style={liquid.style} onPointerMove={morph.onPointerMove} onPointerLeave={morph.onPointerLeave}>
         <GlassAutoRim />
         <LiquidGlassFilter id={liquid.id} />
         <span className="nacre-liquid-glass__refraction" aria-hidden="true" />
-        <Menu aria-label={typeof label === 'string' ? label : '操作菜单'} className="nacre-menu" onAction={onAction}><MenuItems items={items} onAction={onAction} /></Menu>
+        <Menu aria-label={ariaLabel ?? (typeof label === 'string' ? label : '操作菜单')} className="nacre-menu" onAction={onAction}><MenuItems items={items} onAction={onAction} /></Menu>
       </Popover>
     </MenuTrigger>
   );
@@ -182,19 +238,71 @@ export function ActionMenu({label, items, onAction}: ActionMenuProps) {
 
 export interface MenuButtonProps extends ActionMenuProps {}
 
-export function MenuButton({label, items, onAction}: MenuButtonProps) {
+export function MenuButton({label, items, onAction, ariaLabel, buttonClassName, buttonVariant = 'glass', showChevron = true}: MenuButtonProps) {
   const liquid = useLiquidGlassFilter();
   const morph = useLiquidPopoverMorph();
   return (
     <MenuTrigger>
-      <Button variant="glass">{label}<svg aria-hidden="true" viewBox="0 0 16 16" width="15" height="15"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg></Button>
+      <Button variant={buttonVariant} className={buttonClassName} aria-label={ariaLabel}>{label}{showChevron && <svg aria-hidden="true" viewBox="0 0 16 16" width="15" height="15"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>}</Button>
       <Popover ref={morph.ref} className="nacre-popover nacre-menu-popover" placement="bottom start" data-liquid offset={8} style={liquid.style} onPointerMove={morph.onPointerMove} onPointerLeave={morph.onPointerLeave}>
         <GlassAutoRim />
         <LiquidGlassFilter id={liquid.id} />
         <span className="nacre-liquid-glass__refraction" aria-hidden="true" />
-        <Menu aria-label={typeof label === 'string' ? label : '操作菜单'} className="nacre-menu" onAction={onAction}><MenuItems items={items} onAction={onAction} /></Menu>
+        <Menu aria-label={ariaLabel ?? (typeof label === 'string' ? label : '操作菜单')} className="nacre-menu" onAction={onAction}><MenuItems items={items} onAction={onAction} /></Menu>
       </Popover>
     </MenuTrigger>
+  );
+}
+
+export interface MenuBarSection {
+  id: string;
+  label: string;
+  items: ActionItem[];
+}
+
+export interface MenuBarProps {
+  menus: MenuBarSection[];
+  ariaLabel?: string;
+  onAction?: (menuId: string, key: Key) => void;
+}
+
+function MenuBarSectionTrigger({menu, onAction, openMenuId, setOpenMenuId}: {menu: MenuBarSection; onAction?: MenuBarProps['onAction']; openMenuId: string | null; setOpenMenuId: Dispatch<SetStateAction<string | null>>}) {
+  const liquid = useLiquidGlassFilter();
+  const morph = useLiquidPopoverMorph();
+  const handleAction = (key: Key) => {onAction?.(menu.id, key); setOpenMenuId(null);};
+  return (
+    <MenuTrigger isOpen={openMenuId === menu.id} onOpenChange={(isOpen) => setOpenMenuId((current) => isOpen ? menu.id : current === menu.id ? null : current)}>
+      <AriaButton className="nacre-menubar__trigger" onPointerEnter={() => openMenuId !== null && setOpenMenuId(menu.id)}>{menu.label}</AriaButton>
+      <Popover ref={morph.ref} className="nacre-popover nacre-menu-popover" placement="bottom start" data-liquid isNonModal offset={6} style={liquid.style} onPointerMove={morph.onPointerMove} onPointerLeave={morph.onPointerLeave}>
+        <GlassAutoRim />
+        <LiquidGlassFilter id={liquid.id} />
+        <span className="nacre-liquid-glass__refraction" aria-hidden="true" />
+        <Menu aria-label={menu.label} className="nacre-menu" onAction={handleAction}><MenuItems items={menu.items} onAction={handleAction} /></Menu>
+      </Popover>
+    </MenuTrigger>
+  );
+}
+
+export function MenuBar({menus, ariaLabel = '编辑器菜单', onAction}: MenuBarProps) {
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const barRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!openMenuId) return;
+    const closeOutside = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Node) || barRef.current?.contains(target) || (target instanceof Element && target.closest('.nacre-menu-popover'))) return;
+      setOpenMenuId(null);
+    };
+    document.addEventListener('pointerdown', closeOutside, true);
+    return () => document.removeEventListener('pointerdown', closeOutside, true);
+  }, [openMenuId]);
+
+  return (
+    <AriaToolbar ref={barRef} className="nacre-menubar" aria-label={ariaLabel}>
+      <GlassAutoRim />
+      {menus.map((menu) => <MenuBarSectionTrigger key={menu.id} menu={menu} onAction={onAction} openMenuId={openMenuId} setOpenMenuId={setOpenMenuId} />)}
+    </AriaToolbar>
   );
 }
 
@@ -202,17 +310,22 @@ export interface ContextMenuProps {
   children: ReactNode;
   ariaLabel: string;
   items: ActionItem[];
+  isFocusable?: boolean;
   onAction?: (key: Key) => void;
 }
 
-export function ContextMenu({children, ariaLabel, items, onAction}: ContextMenuProps) {
+export function ContextMenu({children, ariaLabel, items, isFocusable = true, onAction}: ContextMenuProps) {
   const [isOpen, setOpen] = useState(false);
   const [point, setPoint] = useState({x: 0, y: 0});
   const targetRef = useRef<HTMLDivElement>(null);
   const anchorRef = useRef<HTMLButtonElement>(null);
   const liquid = useLiquidGlassFilter();
   const morph = useLiquidPopoverMorph();
-  const openAt = (x: number, y: number) => {setPoint({x, y}); setOpen(true);};
+  const openAt = (x: number, y: number) => {
+    const rect = targetRef.current?.getBoundingClientRect();
+    setPoint({x: rect ? x - rect.left : 0, y: rect ? y - rect.top : 0});
+    setOpen(true);
+  };
   const handleContextMenu = (event: MouseEvent<HTMLDivElement>) => {event.preventDefault(); openAt(event.clientX, event.clientY);};
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if ((event.shiftKey && event.key === 'F10') || event.key === 'ContextMenu') {
@@ -236,16 +349,18 @@ export function ContextMenu({children, ariaLabel, items, onAction}: ContextMenuP
     return () => document.removeEventListener('contextmenu', reposition, true);
   }, [isOpen]);
 
-  return <>
-    <div ref={targetRef} className="nacre-context-menu__target" tabIndex={0} aria-label={ariaLabel} onContextMenu={handleContextMenu} onKeyDown={handleKeyDown}>{children}</div>
-    <MenuTrigger isOpen={isOpen} onOpenChange={setOpen}>
-      <AriaButton ref={anchorRef} className="nacre-context-menu__anchor" style={{left: point.x, top: point.y}} aria-hidden="true" excludeFromTabOrder />
-      <Popover key={`${point.x}:${point.y}`} ref={morph.ref} className="nacre-popover nacre-menu-popover" placement="bottom start" data-liquid offset={4} style={liquid.style} onPointerMove={morph.onPointerMove} onPointerLeave={morph.onPointerLeave}>
-        <GlassAutoRim />
-        <LiquidGlassFilter id={liquid.id} />
-        <span className="nacre-liquid-glass__refraction" aria-hidden="true" />
-        <Menu aria-label={ariaLabel} className="nacre-menu" onAction={handleAction}><MenuItems items={items} onAction={handleAction} /></Menu>
-      </Popover>
-    </MenuTrigger>
-  </>;
+  return (
+    <div ref={targetRef} className="nacre-context-menu__target" tabIndex={isFocusable ? 0 : undefined} aria-label={ariaLabel} onContextMenu={handleContextMenu} onKeyDown={handleKeyDown}>
+      {children}
+      <MenuTrigger isOpen={isOpen} onOpenChange={setOpen}>
+        <AriaButton ref={anchorRef} className="nacre-context-menu__anchor" style={{left: point.x, top: point.y}} aria-hidden="true" excludeFromTabOrder />
+        <Popover key={`${point.x}:${point.y}`} ref={morph.ref} className="nacre-popover nacre-menu-popover" placement="bottom start" data-liquid offset={4} style={liquid.style} onPointerMove={morph.onPointerMove} onPointerLeave={morph.onPointerLeave}>
+          <GlassAutoRim />
+          <LiquidGlassFilter id={liquid.id} />
+          <span className="nacre-liquid-glass__refraction" aria-hidden="true" />
+          <Menu aria-label={ariaLabel} className="nacre-menu" onAction={handleAction}><MenuItems items={items} onAction={handleAction} /></Menu>
+        </Popover>
+      </MenuTrigger>
+    </div>
+  );
 }
