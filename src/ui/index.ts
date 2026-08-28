@@ -1,5 +1,6 @@
 export * from './Button';
 export * from './Cards';
+export * from './Chat';
 export * from './ColorPicker';
 export * from './Application';
 export * from './ComboBox';

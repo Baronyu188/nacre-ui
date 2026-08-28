@@ -20,9 +20,9 @@ Import all public components from `@nacre-ui/react`.
 
 ## Navigation and application chrome
 
-- `DesktopNavigation`: floating 5%-fill blurred sidebar with neutral glass selection.
+- `DesktopNavigation`: floating 5%-fill blurred sidebar with neutral glass selection and optional controlled hide action.
 - `MobileNavigation`: translucent bottom navigation with shared spring lens and optional separate action.
-- `BreadcrumbTrail`, `ActionMenu`, `MenuButton`, `ContextMenu`, `Toolbar`, `Pagination`, `FileDrop`, `ColorPicker`.
+- `BreadcrumbTrail`, `ActionMenu`, `MenuBar`, `MenuButton`, `ContextMenu`, `Toolbar`, `Pagination`, `FileDrop`, `ColorPicker`.
 
 ## Structure, overlays, and feedback
 
@@ -34,7 +34,8 @@ Import all public components from `@nacre-ui/react`.
 - `CommandPalette`: controlled searchable command surface with keyboard-ready list actions.
 - `NotificationCenter` / `NotificationFlyout`: notification drawer with dismissible glass notification rows.
 - `Toast`: transient success, failure, warning, and undo feedback through the exported `toastQueue`.
-- `Progress`, `MeterBar`, `Badge`, `Notice`, `Skeleton`.
+- `Progress`: determinate with `value`, or indeterminate with `isIndeterminate`.
+- `MeterBar`, `Badge`, `Notice`, `Skeleton`.
 
 ## Content and data
 
@@ -42,6 +43,15 @@ Import all public components from `@nacre-ui/react`.
 - `SettingsCard`: grouped settings rows with optional icon, value, control, or disclosure action.
 - `DataTable`: structured selectable data; selection remains neutral gray.
 - `Avatar`, `StatusDot`, `Kbd`, `Separator`, `EmptyState`.
+
+## Chat and agents
+
+- `ConversationList`: selectable conversation summary list with optional avatar, timestamp, and unread count.
+- `ChatMessage`: user, assistant, and system bubbles with rich React content and optional actions.
+- `ChatComposer`: contenteditable rich-text composer with formatting and leading/trailing control slots.
+- `AgentComposer`: agent-oriented composer preset with attachment, tool, model, voice, and send controls.
+- `AgentThinking`: dots, wave, and orbit status animations.
+- `AgentProgressSidebar`: compact ordered task progress with complete, active, pending, and error states.
 
 ## Composition rules
 

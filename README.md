@@ -8,7 +8,7 @@
 
 > Private preview. The API is reusable today, but the package is intentionally protected from public npm publication while it is still being reviewed.
 
-Current preview: **v0.2.0**. See [CHANGELOG.md](./CHANGELOG.md) for release details.
+Current preview: **v0.3.0**. See [CHANGELOG.md](./CHANGELOG.md) for release details.
 
 ## Design direction
 
@@ -58,9 +58,10 @@ document.documentElement.style.setProperty('--nacre-accent-rgb', '10, 132, 255')
 
 - Material and actions: `GlassSurface`, `GlassGroup`, `LiquidGlassSurface`, `PerspectiveCard`, `Button`, `LiquidGlassButton`
 - Forms and selection: `Field`, `TextAreaField`, `SearchInput`, `PasswordField`, `NativeDateInput`, `Select`, `ComboBox`, `Switch`, `Checkbox`, `RadioCards`, `Range`, `NumberInput`, `Tags`, `Tabs`, `SegmentedControl`
-- Navigation and application chrome: `DesktopNavigation`, `MobileNavigation`, `BreadcrumbTrail`, `ActionMenu`, `MenuButton`, `ContextMenu`, `CommandPalette`, `Toolbar`, `Pagination`, `FileDrop`, `ColorPicker`
+- Navigation and application chrome: `DesktopNavigation`, `MobileNavigation`, `BreadcrumbTrail`, `ActionMenu`, `MenuBar`, `MenuButton`, `ContextMenu`, `CommandPalette`, `Toolbar`, `Pagination`, `FileDrop`, `ColorPicker`
 - Structure and overlays: `Accordion`, `InfoPopover`, `Hint`, `Presentation`, `AdaptiveSheet`, `AlertDialog`, `Toast`, `NotificationCenter`
-- Content and feedback: `Card`, `CardSkeleton`, `SettingsCard`, `DataTable`, `Progress`, `MeterBar`, `Badge`, `Notice`, `Skeleton`, `EmptyState`, `Avatar`, `StatusDot`, `Kbd`, `Separator`
+- Content and feedback: `Card`, `CardSkeleton`, `SettingsCard`, `DataTable`, `Progress` (determinate or indeterminate), `MeterBar`, `Badge`, `Notice`, `Skeleton`, `EmptyState`, `Avatar`, `StatusDot`, `Kbd`, `Separator`
+- Chat and agents: `ConversationList`, `ChatMessage`, `ChatComposer`, `AgentComposer`, `AgentThinking`, `AgentProgressSidebar`
 
 ## Gallery and package
 

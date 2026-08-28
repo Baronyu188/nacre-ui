@@ -1,19 +1,23 @@
-import {useEffect, useState} from 'react';
-import {motion} from 'motion/react';
+import {useEffect, useState, type CSSProperties} from 'react';
+import {AnimatePresence, motion} from 'motion/react';
 import {
   Accordion,
   AlertDialog,
   AdaptiveSheet,
+  AgentComposer,
+  AgentThinking,
   Avatar,
   Badge,
   BreadcrumbTrail,
   Button,
   Card,
   CardSkeleton,
+  ChatMessage,
   Checkbox,
   ColorPicker,
   ComboBox,
   CommandPalette,
+  ConversationList,
   ContextMenu,
   DataTable,
   DesktopNavigation,
@@ -26,6 +30,7 @@ import {
   InfoPopover,
   Kbd,
   MeterBar,
+  MenuBar,
   MenuButton,
   MobileNavigation,
   Notice,
@@ -74,6 +79,10 @@ function MoonIcon() {
 
 function BellIcon() {
   return <svg aria-hidden="true" viewBox="0 0 20 20" width="18" height="18"><path d="M4.8 13.8h10.4l-1.3-1.7V8a3.9 3.9 0 0 0-7.8 0v4.1l-1.3 1.7Zm3.6 2a1.8 1.8 0 0 0 3.2 0" fill="none" stroke="currentColor" strokeWidth="1.55" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+}
+
+function ChatIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 20 20"><path d="M4.5 4h11A1.5 1.5 0 0 1 17 5.5v7a1.5 1.5 0 0 1-1.5 1.5H9l-4 3v-3h-.5A1.5 1.5 0 0 1 3 12.5v-7A1.5 1.5 0 0 1 4.5 4Z" /><path d="M6.5 8h7M6.5 11h4.5" /></svg>;
 }
 
 function DeviceIcon() {
@@ -173,10 +182,30 @@ const galleryNotifications = [
   {id: 'review', title: '组件审查完成', description: '按钮与菜单共用同一圈玻璃高光。', time: '8 分钟'},
 ];
 
+const galleryConversations = [
+  {id: 'nacre-agent', title: 'Nacre Agent', preview: '正在整理组件依赖…', time: '现在', unread: 2, avatar: 'NA'},
+  {id: 'design-review', title: '设计审查', preview: '检查浅色玻璃的通透度', time: '9:12', avatar: 'DR'},
+  {id: 'release', title: '版本准备', preview: '导出组件与类型声明', time: '昨天', avatar: 'R'},
+];
+
 const paletteCommands = [
   {id: 'new-surface', label: '新建表面', description: '创建一个空白工作区', shortcut: '⌘ N', keywords: ['创建']},
   {id: 'open-library', label: '打开组件库', description: '跳转到组件展廊', shortcut: '⌘ L', keywords: ['组件']},
   {id: 'toggle-theme', label: '切换明暗模式', description: '在浅色与深色之间切换', shortcut: '⌘ ⇧ D', keywords: ['主题']},
+];
+
+const galleryNavigationItems = [
+  {id: 'components', label: '组件展廊', icon: <GridIcon />},
+  {id: 'feedback', label: '状态反馈', icon: <BellIcon />},
+  {id: 'workflow', label: '工作流', icon: <EditIcon />},
+  {id: 'chat', label: 'Chat 测试', icon: <ChatIcon />},
+  {id: 'application', label: '应用界面', icon: <DeviceIcon />},
+];
+
+const conversationMenuItems = [
+  {id: 'unread', label: '标记为未读', icon: <BellIcon />},
+  {id: 'rename', label: '重命名对话', icon: <EditIcon />},
+  {id: 'delete', label: '删除对话', tone: 'danger' as const, icon: <TrashIcon />},
 ];
 
 export function App() {
@@ -191,8 +220,12 @@ export function App() {
   const [fileStatus, setFileStatus] = useState('未选择文件');
   const [accent, setAccent] = useState('#0a84ff');
   const [notifications, setNotifications] = useState(galleryNotifications);
-  const [desktopSection, setDesktopSection] = useState('connections');
-  const [mobileSection, setMobileSection] = useState('home');
+  const [gallerySection, setGallerySection] = useState('components');
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(220);
+  const [selectedConversation, setSelectedConversation] = useState('nacre-agent');
+  const [mobileChatOpen, setMobileChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<Array<{id: string; text: string}>>([]);
   const [flowStep, setFlowStep] = useState('details');
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetPlacement, setSheetPlacement] = useState<'right' | 'left' | 'top' | 'bottom'>('right');
@@ -201,6 +234,10 @@ export function App() {
   const accentNumber = Number.parseInt(accent.slice(1), 16);
   const accentRgb = `${accentNumber >> 16}, ${(accentNumber >> 8) & 255}, ${accentNumber & 255}`;
   const dismissNotification = (id: string) => setNotifications((current) => current.filter((item) => item.id !== id));
+  const navigateGallery = (key: string) => {
+    setGallerySection(key);
+    document.getElementById(key)?.scrollIntoView({block: 'start'});
+  };
 
   useEffect(() => {
     const root = document.documentElement;
@@ -213,11 +250,30 @@ export function App() {
   }, [accent, accentRgb]);
 
   return (
-    <div className="demo-app" data-theme={dark ? 'dark' : 'light'}>
+    <div className="demo-app" data-theme={dark ? 'dark' : 'light'} data-sidebar={sidebarVisible ? 'open' : 'closed'} style={{'--demo-sidebar-width': `${sidebarWidth}px`} as CSSProperties}>
       <div className="demo-atmosphere" aria-hidden="true">
         <motion.div className="demo-orb demo-orb--violet" animate={{x: [0, 42, -12, 0], y: [0, -26, 18, 0]}} transition={{duration: 18, repeat: Infinity, ease: 'easeInOut'}} />
         <motion.div className="demo-orb demo-orb--aqua" animate={{x: [0, -34, 18, 0], y: [0, 30, -15, 0]}} transition={{duration: 22, repeat: Infinity, ease: 'easeInOut'}} />
         <div className="demo-grain" />
+      </div>
+
+      <AnimatePresence initial={false}>
+        {sidebarVisible && (
+          <motion.aside className="demo-gallery-sidebar" initial={{opacity: 0, x: -24}} animate={{opacity: 1, x: 0}} exit={{opacity: 0, x: -24}} transition={{duration: .24, ease: [.2, .8, .2, 1]}}>
+            <DesktopNavigation title="Nacre Gallery" ariaLabel="Gallery 导航" selectedKey={gallerySection} width={sidebarWidth} onWidthChange={setSidebarWidth} onSelectionChange={navigateGallery} onHide={() => setSidebarVisible(false)} items={galleryNavigationItems} />
+          </motion.aside>
+        )}
+      </AnimatePresence>
+
+      {!sidebarVisible && (
+        <Button className="demo-sidebar-restore" variant="glass" magnetic={false} aria-label="显示导航栏" onPress={() => setSidebarVisible(true)}>
+          <svg aria-hidden="true" viewBox="0 0 20 20"><path d="m7.5 4.5 5.5 5.5-5.5 5.5" /></svg>
+          <span>导航</span>
+        </Button>
+      )}
+
+      <div className="demo-gallery-mobile-navigation">
+        <MobileNavigation ariaLabel="Gallery 移动端导航" selectedKey={gallerySection} onSelectionChange={navigateGallery} items={galleryNavigationItems} action={{label: '打开命令面板', icon: <SearchIcon />, onPress: () => setCommandOpen(true)}} />
       </div>
 
       <GlassSurface as="header" className="demo-nav" interactive>
@@ -271,6 +327,47 @@ export function App() {
               <p>输入区使用稳定的内容材质；下拉菜单才从触发器上方“变厚”并展开。</p>
             </article>
 
+            <article className="demo-component-card demo-component-card--wide" id="chat">
+              <div className="demo-card-head"><div><span>AI 会话</span><h3>Chat 与 Agent 工作台</h3></div><code>ConversationList · ChatMessage · AgentComposer · AgentThinking</code></div>
+              <div className="demo-stage demo-chat-stage" data-mobile-view={mobileChatOpen ? 'thread' : 'list'}>
+                <aside className="demo-chat-list-panel">
+                  <ConversationList
+                    items={galleryConversations}
+                    selectedKey={selectedConversation}
+                    headerAction={<button type="button" className="demo-chat-new" aria-label="新建对话">+</button>}
+                    contextMenuItems={conversationMenuItems}
+                    onSelectionChange={(key) => {setSelectedConversation(key); setMobileChatOpen(true);}}
+                    onContextAction={(conversationId, actionId) => setLastAction(`对话 ${conversationId} · ${actionId}`)}
+                  />
+                </aside>
+                <section className="demo-chat-thread" aria-label="Nacre Agent 对话">
+                  <header>
+                    <button type="button" className="demo-chat-back" aria-label="返回对话列表" onClick={() => setMobileChatOpen(false)}><svg aria-hidden="true" viewBox="0 0 20 20"><path d="m12.5 4.5-5.5 5.5 5.5 5.5" /></svg></button>
+                    <div><strong>Nacre Agent</strong><span>组件工作台</span></div>
+                  </header>
+                  <div className="demo-chat-messages">
+                    <ChatMessage role="system">今天 09:18</ChatMessage>
+                    <ChatMessage role="assistant" author="Nacre Agent" avatar="NA" meta="09:18">
+                      <p>我已经检查了当前组件表，建议先处理 <strong>MenuBar</strong> 和 <code>Progress</code>。</p>
+                      <ul><li>菜单支持相邻栏目直接切换</li><li>不确定进度保持连续扫描</li></ul>
+                    </ChatMessage>
+                    <ChatMessage role="user" author="你" meta="09:19">再把 Chat 组件加到 Gallery，并保留富文本输入。</ChatMessage>
+                    {chatMessages.map((message) => <ChatMessage key={message.id} role="user" author="你" meta="刚刚">{message.text}</ChatMessage>)}
+                    <AgentThinking label="正在组织组件导出" variant="wave" />
+                  </div>
+                  <AgentComposer
+                    placeholder="向 Agent 发送任务…"
+                    onAttachmentAction={(key) => setLastAction(`附件 · ${key}`)}
+                    onToolAction={(key) => setLastAction(`工具 · ${key}`)}
+                    onModeChange={(mode) => setLastAction(`思考强度 · ${mode}`)}
+                    onVoice={() => setLastAction('开始语音输入')}
+                    onSend={({text}) => setChatMessages((messages) => [...messages, {id: `${Date.now()}`, text}])}
+                  />
+                </section>
+              </div>
+              <p>组件使用可组合插槽，输入栏可叠加附件、工具、模型与语音控件。</p>
+            </article>
+
             <article className="demo-component-card demo-component-card--wide">
               <div className="demo-card-head"><div><span>导航</span><h3>路径导航</h3></div><code>BreadcrumbTrail</code></div>
               <div className="demo-stage demo-navigation-stage">
@@ -281,27 +378,6 @@ export function App() {
                 ]} />
               </div>
               <p>路径保持安静，只在当前位置上增强可读性。</p>
-            </article>
-
-            <article className="demo-component-card demo-component-card--wide">
-              <div className="demo-card-head"><div><span>导航</span><h3>电脑端与移动端导航</h3></div><code>DesktopNavigation · MobileNavigation</code></div>
-              <div className="demo-stage demo-navigation-standards">
-                <section className="demo-desktop-navigation-space" aria-label="电脑端导航示例">
-                  <DesktopNavigation title="工作空间" ariaLabel="电脑端主导航" selectedKey={desktopSection} onSelectionChange={setDesktopSection} items={[
-                    {id: 'connections', label: '所有连接', icon: <DeviceIcon />},
-                    {id: 'network', label: '网络', icon: <NetworkIcon />},
-                    {id: 'library', label: '资源库', icon: <LibraryIcon />},
-                  ]} />
-                  <div className="demo-desktop-navigation-content"><small>当前空间</small><strong>{desktopSection === 'connections' ? '所有连接' : desktopSection === 'network' ? '网络' : '资源库'}</strong><span /></div>
-                </section>
-                <section className="demo-mobile-navigation-space" aria-label="移动端导航示例">
-                  <MobileNavigation ariaLabel="移动端主导航" selectedKey={mobileSection} onSelectionChange={setMobileSection} action={{label: '搜索', icon: <SearchIcon />, onPress: () => setLastAction('搜索')}} items={[
-                    {id: 'home', label: '首页', icon: <HomeIcon />},
-                    {id: 'new', label: '新建', icon: <GridIcon />},
-                    {id: 'library', label: '资料库', icon: <LibraryIcon />},
-                  ]} />
-                </section>
-              </div>
             </article>
 
             <article className="demo-component-card">
@@ -367,7 +443,7 @@ export function App() {
               <p>气泡浮层、对话框和抽屉都保留触发来源，尺寸越大材质越稳、越厚。</p>
             </article>
 
-            <article className="demo-component-card demo-component-card--wide">
+            <article className="demo-component-card demo-component-card--wide" id="feedback">
               <div className="demo-card-head"><div><span>反馈</span><h3>轻量系统反馈</h3></div><code>Progress · MeterBar · Notice · NotificationCenter · Skeleton</code></div>
               <div className="demo-stage demo-feedback-grid">
                 <div className="demo-feedback-stack">
@@ -387,6 +463,39 @@ export function App() {
                 </div>
               </div>
               <p>反馈组件减少无意义装饰：颜色表达状态，运动只负责说明“正在变化”。</p>
+            </article>
+
+            <article className="demo-component-card demo-component-card--wide" id="workflow">
+              <div className="demo-card-head"><div><span>编辑器</span><h3>编辑菜单与不确定进度</h3></div><code>MenuBar · Progress(isIndeterminate)</code></div>
+              <div className="demo-stage demo-editor-status-grid">
+                <section className="demo-indeterminate-sample">
+                  <small>异步任务</small>
+                  <Progress label="正在同步组件" isIndeterminate />
+                </section>
+                <section className="demo-menubar-sample">
+                  <MenuBar menus={[
+                    {id: 'file', label: '文件', items: [
+                      {id: 'new', label: '新建表面', icon: <SparkleIcon />, shortcut: '⌘ N'},
+                      {id: 'open', label: '打开资源库', icon: <LibraryIcon />, shortcut: '⌘ O'},
+                      {id: 'export', label: '导出', icon: <StorageIcon />, children: [
+                        {id: 'export-image', label: '导出图像', icon: <GridIcon />},
+                        {id: 'export-package', label: '导出组件包', icon: <CopyIcon />},
+                      ]},
+                    ]},
+                    {id: 'edit', label: '编辑', items: [
+                      {id: 'undo', label: '撤销', icon: <UpdateIcon />, shortcut: '⌘ Z'},
+                      {id: 'copy', label: '复制', icon: <CopyIcon />, shortcut: '⌘ C'},
+                      {id: 'rename', label: '重命名', icon: <EditIcon />, shortcut: '↵'},
+                    ]},
+                    {id: 'view', label: '视图', items: [
+                      {id: 'components', label: '组件库', icon: <GridIcon />},
+                      {id: 'workspace', label: '工作区', icon: <HomeIcon />},
+                    ]},
+                  ]} onAction={(menu, key) => setLastAction(`${menu}：${String(key)}`)} />
+                  <small>菜单展开后直接掠过相邻栏目即可切换。</small>
+                </section>
+              </div>
+              <p>不确定进度只表达“正在处理”；Menubar 保留编辑器熟悉的文件、编辑和视图结构。</p>
             </article>
 
             <article className="demo-component-card demo-component-card--wide">
@@ -472,7 +581,7 @@ export function App() {
               <p>卡片式单选强化空间选择，数值控件仍使用可读的实体输入面，只把步进反馈做得灵动。</p>
             </article>
 
-            <article className="demo-component-card demo-component-card--wide">
+            <article className="demo-component-card demo-component-card--wide" id="application">
               <div className="demo-card-head"><div><span>应用界面</span><h3>工具与元数据</h3></div><code>Toolbar · ToggleButton · IconButton · LinkButton</code></div>
               <div className="demo-stage demo-application-grid">
                 <Toolbar aria-label="画布工具">
